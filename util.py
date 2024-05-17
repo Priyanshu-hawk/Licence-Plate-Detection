@@ -2,7 +2,7 @@ import string
 import easyocr
 
 # Initialize the OCR reader
-reader = easyocr.Reader(['en'], gpu=False)
+reader = easyocr.Reader(['en'], gpu=True)
 
 # Mapping dictionaries for character conversion
 dict_char_to_int = {'O': '0',
@@ -61,6 +61,7 @@ def write_csv(results, output_path):
 def license_complies_format(text):
     """
     Check if the license plate text complies with the required format.
+    CG04HA0235
 
     Args:
         text (str): License plate text.
@@ -68,16 +69,19 @@ def license_complies_format(text):
     Returns:
         bool: True if the license plate complies with the format, False otherwise.
     """
-    if len(text) != 7:
+    if len(text) != 10:
         return False
 
-    if (text[0] in string.ascii_uppercase or text[0] in dict_int_to_char.keys()) and \
-       (text[1] in string.ascii_uppercase or text[1] in dict_int_to_char.keys()) and \
-       (text[2] in ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9'] or text[2] in dict_char_to_int.keys()) and \
-       (text[3] in ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9'] or text[3] in dict_char_to_int.keys()) and \
-       (text[4] in string.ascii_uppercase or text[4] in dict_int_to_char.keys()) and \
-       (text[5] in string.ascii_uppercase or text[5] in dict_int_to_char.keys()) and \
-       (text[6] in string.ascii_uppercase or text[6] in dict_int_to_char.keys()):
+    if (text[0] in string.ascii_uppercase) and \
+       (text[1] in string.ascii_uppercase) and \
+       (text[2] in ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9']) and \
+       (text[3] in ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9']) and \
+       (text[4] in string.ascii_uppercase) and \
+       (text[5] in string.ascii_uppercase) and \
+       (text[6] in ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9']) and \
+       (text[7] in ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9']) and \
+       (text[8] in ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9']) and \
+       (text[9] in ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9']):
         return True
     else:
         return False
@@ -118,13 +122,18 @@ def read_license_plate(license_plate_crop):
 
     detections = reader.readtext(license_plate_crop)
 
+    # print(detections)
+
     for detection in detections:
         bbox, text, score = detection
 
         text = text.upper().replace(' ', '')
 
+        # print(text)
+
         if license_complies_format(text):
-            return format_license(text), score
+            return text, score
+        # return text, score
 
     return None, None
 
@@ -155,3 +164,6 @@ def get_car(license_plate, vehicle_track_ids):
         return vehicle_track_ids[car_indx]
 
     return -1, -1, -1, -1, -1
+
+if __name__ == "__main__":
+    print(license_complies_format('CG04HA0235'))
